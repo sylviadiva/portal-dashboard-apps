@@ -1,59 +1,160 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Portal Dashboard Aplikasi Internal
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Portal terpusat untuk mengakses aplikasi internal perusahaan sesuai hak akses masing-masing user (departemen, role, dan/atau penunjukan langsung).
 
-## About Laravel
+**Stack:** Laravel 12 (API) + Vue 3 (Vite, Composition API) + PostgreSQL
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 1. Cara Menjalankan Aplikasi
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Prasyarat
+- PHP ^8.2 dengan extension `pdo_pgsql`, `pgsql`, `zip`, `mbstring`, `openssl`
+- Composer
+- Node.js ^18 + npm
+- PostgreSQL (database sudah dibuat, misal `portal_dashboard`)
 
-## Learning Laravel
+### Langkah Instalasi
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+```bash
+# 1. Clone repository & masuk ke folder project
+git clone <repo-url>
+cd portal-dashboard-apps
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+# 2. Install dependency PHP
+composer install
 
-## Laravel Sponsors
+# 3. Salin file environment & generate app key
+cp .env.example .env
+php artisan key:generate
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+# 4. Sesuaikan konfigurasi database di .env
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=portal_dashboard
+DB_USERNAME=postgres
+DB_PASSWORD=isi_password
 
-### Premium Partners
+# 5. Jalankan migration + seeder (data dummy)
+php artisan migrate:fresh --seed
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+# 6. Install dependency frontend
+npm install
+```
 
-## Contributing
+### Menjalankan Server (2 terminal berjalan bersamaan)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+# Terminal 1 — Laravel
+php artisan serve
 
-## Code of Conduct
+# Terminal 2 — Vite (compile Vue)
+npm run dev
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Buka browser ke **http://localhost:8000**
 
-## Security Vulnerabilities
+### Akun Login Default (hasil seeder)
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+| Email | Password | Role |
+|---|---|---|
+| adhika@company.com | password | Admin |
+| (user lain sesuai seeder) | password | User biasa |
 
-## License
+> User baru yang dibuat lewat menu **Kelola User** otomatis mendapat password default `password` dan **wajib menggantinya** saat login pertama kali.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+
+## 2. Struktur Singkat Project
+
+### Backend (Laravel)
+
+```
+app/
+├── Models/
+│   ├── User.php            # relasi ke Department, Role, dan specific Application
+│   ├── Department.php
+│   ├── Role.php
+│   └── Application.php
+├── Services/
+│   └── AccessService.php   # logic inti: UNION 3 sumber akses + dedup
+├── Http/Controllers/Api/
+│   ├── AuthController.php          # login, logout, me, reset-password
+│   ├── DashboardController.php     # my-applications, effective-access
+│   ├── ApplicationController.php   # CRUD aplikasi
+│   ├── AccessController.php        # assign akses (dept/role/user)
+│   ├── UserController.php          # CRUD user
+│   └── ReferenceController.php     # data referensi utk dropdown
+
+database/
+├── migrations/    # departments, roles, users, applications, 3 pivot table
+└── seeders/       # data dummy: 3 dept, 4 role, 9+ app, 10 user + overlap akses
+```
+
+### Frontend (Vue 3 + Vite)
+
+```
+resources/js/
+├── api.js                  # axios instance + interceptor auto-attach token
+├── router.js                # routing + auth guard (login/admin/reset-password)
+├── store/auth.js             # state login sederhana (reactive, tanpa Pinia)
+├── layouts/
+│   └── AppLayout.vue        # sidebar navigasi (dibungkus di semua halaman ber-auth)
+└── pages/
+    ├── Login.vue
+    ├── ResetPassword.vue     # wajib diisi user baru sebelum akses menu lain
+    ├── Dashboard.vue          # dashboard user, render card aplikasi
+    └── admin/
+        ├── Applications.vue       # CRUD aplikasi + search/sort/pagination
+        ├── AccessSettings.vue     # assign akses dept/role/user per aplikasi
+        ├── Users.vue               # CRUD user + search/sort/pagination
+        └── EffectiveAccess.vue    # "database view" — user + daftar aplikasinya
+```
+
+### Dokumentasi API
+Tersedia terpisah di `API_Documentation_Portal_Dashboard.docx` — berisi seluruh 19 endpoint beserta contoh request/response.
+
+---
+
+## 3. Penjelasan Desain
+
+### Skema Database
+
+Hak akses aplikasi punya **3 sumber independen**, dimodelkan lewat 3 tabel pivot:
+
+- `app_department` — aplikasi di-assign ke departemen (semua user di dept itu otomatis dapat akses)
+- `app_role` — aplikasi di-assign ke role
+- `app_user` — aplikasi di-assign langsung ke 1 user tertentu (specific access)
+
+`users` sendiri punya `department_id` dan `role_id` sebagai foreign key biasa — jadi 2 dari 3 sumber akses itu "melekat" langsung ke identitas user.
+
+### Effective Access Engine (inti dari sistem)
+
+`AccessService` menggabungkan ketiga sumber lewat **UNION ALL** di level query, lalu dedup di collection (`unique('id')`). Kenapa `UNION ALL` + dedup manual, bukan `UNION` murni? Karena `UNION` murni mensyaratkan struktur kolom identik persis antar sub-query, sementara `UNION ALL` + dedup by primary key lebih predictable lintas driver database (PostgreSQL/MySQL) dan lebih mudah dibaca.
+
+Ada 2 method utama:
+- `getEffectiveApplications($user)` — untuk 1 user (dipakai dashboard user yang sedang login), 3 query per panggilan.
+- `getEffectiveAccessMatrix()` — untuk **semua** user sekaligus dalam **1 query gabungan** (bukan N+1), dipakai di halaman admin "Effective Access". Ini yang jadi dasar requirement "Database View — Effective Access".
+
+### Force Password Change
+
+User baru yang dibuat admin otomatis mendapat password default (`password`) dan flag `is_change_default_password = true`. Router guard di frontend akan memaksa user tersebut ke halaman `/reset-password` — tidak bisa mengakses menu manapun (termasuk lewat mengetik URL langsung) sampai password diganti.
+
+### Struktur Kode
+
+- **Controller** hanya menangani HTTP request/response dan validasi input.
+- **Service** (`AccessService`) menampung business logic yang kompleks (query UNION), supaya controller tetap tipis dan logic bisa dites/dipakai ulang di tempat lain.
+- **Model** menangani relasi Eloquent antar tabel.
+- Di sisi Vue, tiap halaman admin mengikuti pola yang sama: `fetch → search (filter) → sort → paginate`, supaya konsisten dan mudah dipahami di halaman manapun.
+
+### Autentikasi
+
+Menggunakan **Laravel Sanctum** (Bearer Token) — dipilih karena aplikasi ini murni SPA + API, tidak butuh kompleksitas OAuth penuh seperti Passport.
+
+### Bonus yang Diimplementasikan
+
+- ✅ Pagination & sorting (di halaman Kelola Aplikasi, Kelola User, Effective Access)
+- ✅ Search/filter dinamis di semua halaman admin
+- ✅ API design konsisten (REST, resource-based)
+- ✅ Dokumentasi API lengkap

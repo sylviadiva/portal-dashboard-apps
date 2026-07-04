@@ -11,7 +11,7 @@ class ApplicationController extends Controller
     public function index()
     {
         return response()->json(
-            Application::orderBy('name')->paginate(10)
+            Application::orderBy('name')->get()
         );
     }
 

@@ -1,7 +1,5 @@
 <template>
-  <div>
-    <h1>Portal Dashboard</h1>
-  </div>
+  <router-view />
 </template>
 
 <script setup>

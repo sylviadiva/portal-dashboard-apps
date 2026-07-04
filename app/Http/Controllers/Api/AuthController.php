@@ -45,4 +45,19 @@ class AuthController extends Controller
             $request->user()->load(['department', 'role'])
         );
     }
+
+    public function resetPassword(Request $request)
+    {
+        $validated = $request->validate([
+            'new_password' => ['required', 'string', 'min:6', 'confirmed'],
+        ]);
+
+        $user = $request->user();
+        $user->update([
+            'password' => bcrypt($validated['new_password']),
+            'is_change_default_password' => false,
+        ]);
+
+        return response()->json(['message' => 'Password berhasil diubah']);
+    }
 }

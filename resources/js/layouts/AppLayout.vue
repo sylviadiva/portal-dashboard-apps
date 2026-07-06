@@ -3,7 +3,6 @@
     <aside class="sidebar">
       <div class="sidebar-header">
         <h2>Portal Dashboard</h2>
-        <p class="user-name">{{ authStore.state.user?.name }}</p>
       </div>
 
       <nav class="sidebar-nav">

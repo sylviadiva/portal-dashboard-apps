@@ -1,6 +1,6 @@
 # Portal Dashboard Aplikasi Internal
 
-Portal terpusat untuk mengakses aplikasi internal perusahaan sesuai hak akses masing-masing user (departemen, role, dan/atau penunjukan langsung).
+Portal terpusat untuk mengakses aplikasi internal perusahaan sesuai hak akses masing-masing user (departemen, role, dan/atau spesifik user).
 
 **Stack:** Laravel 12 (API) + Vue 3 (Vite, Composition API) + PostgreSQL
 
@@ -113,7 +113,7 @@ resources/js/
 ```
 
 ### Dokumentasi API
-Tersedia terpisah di `API_Documentation_Portal_Dashboard.docx` — berisi seluruh 19 endpoint beserta contoh request/response.
+Tersedia terpisah di `API_Documentation_Portal_Dashboard.docx` — berisi seluruh endpoint beserta contoh request/response.
 
 ---
 
@@ -129,7 +129,7 @@ Hak akses aplikasi punya **3 sumber independen**, dimodelkan lewat 3 tabel pivot
 
 `users` sendiri punya `department_id` dan `role_id` sebagai foreign key biasa — jadi 2 dari 3 sumber akses itu "melekat" langsung ke identitas user.
 
-### Effective Access Engine (inti dari sistem)
+### Effective Access Engine
 
 `AccessService` menggabungkan ketiga sumber lewat **UNION ALL** di level query, lalu dedup di collection (`unique('id')`). Kenapa `UNION ALL` + dedup manual, bukan `UNION` murni? Karena `UNION` murni mensyaratkan struktur kolom identik persis antar sub-query, sementara `UNION ALL` + dedup by primary key lebih predictable lintas driver database (PostgreSQL/MySQL) dan lebih mudah dibaca.
 
@@ -144,13 +144,13 @@ User baru yang dibuat admin otomatis mendapat password default (`password`) dan 
 ### Struktur Kode
 
 - **Controller** hanya menangani HTTP request/response dan validasi input.
-- **Service** (`AccessService`) menampung business logic yang kompleks (query UNION), supaya controller tetap tipis dan logic bisa dites/dipakai ulang di tempat lain.
+- **Service** (`AccessService`) menampung business logic yang kompleks (query UNION), supaya thin controller dan logic bisa dites/dipakai ulang di tempat lain.
 - **Model** menangani relasi Eloquent antar tabel.
-- Di sisi Vue, tiap halaman admin mengikuti pola yang sama: `fetch → search (filter) → sort → paginate`, supaya konsisten dan mudah dipahami di halaman manapun.
+- Di sisi Vue, tiap halaman admin mengikuti pola yang sama: `fetch → search (filter) → sort → paginate`, supaya konsisten dan mudah dipahami di setiap halaman.
 
 ### Autentikasi
 
-Menggunakan **Laravel Sanctum** (Bearer Token) — dipilih karena aplikasi ini murni SPA + API, tidak butuh kompleksitas OAuth penuh seperti Passport.
+Menggunakan **Laravel Sanctum** (Bearer Token) — dipilih karena aplikasi ini murni SPA + API, belum membutuhkan kompleksitas OAuth seperti Passport.
 
 ### Bonus yang Diimplementasikan
 

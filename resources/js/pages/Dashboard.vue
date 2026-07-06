@@ -8,7 +8,7 @@
     <main class="dashboard-main">
       <p v-if="isLoading" class="status-text">Memuat aplikasi...</p>
       <p v-else-if="applications.length === 0" class="status-text">
-        Kamu belum punya akses ke aplikasi apapun. Hubungi admin.
+        Kamu belum punya akses ke aplikasi apapun. Silakan hubungi Admin.
       </p>
 
       <div v-else class="app-grid">

@@ -1,6 +1,6 @@
 # Portal Dashboard Aplikasi Internal
 
-Portal terpusat untuk mengakses aplikasi internal perusahaan sesuai hak akses masing-masing user (departemen, role, dan/atau spesifik user).
+Portal terpusat untuk mengakses aplikasi internal perusahaan sesuai hak akses masing-masing user (departemen, role, dan/atau spesifik akses).
 
 **Stack:** Laravel 12 (API) + Vue 3 (Vite, Composition API) + PostgreSQL
 
@@ -45,8 +45,6 @@ php artisan migrate:fresh --seed
 # 6. Install dependency frontend
 npm install
 ```
-
-> ⚠️ Jangan lupa jalankan `php artisan key:generate` (langkah 3) — tanpa ini akan muncul error `MissingAppKeyException` saat membuka aplikasi di browser.
 
 ### Menjalankan Server (2 terminal berjalan bersamaan)
 
@@ -170,7 +168,7 @@ Menggunakan **Laravel Sanctum** (Bearer Token) — dipilih karena aplikasi ini m
 
 Berikut kendala yang ditemukan saat pengujian *clone & run* dari awal di device lain, beserta solusinya.
 
-### `npm install` gagal dengan error `ERESOLVE` (konflik versi `vite`)
+### `npm install` failed dengan error `ERESOLVE` (konflik versi `vite`)
 
 ```
 npm error Found: vite@8.1.3

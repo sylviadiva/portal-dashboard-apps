@@ -36,12 +36,17 @@ DB_DATABASE=portal_dashboard
 DB_USERNAME=postgres
 DB_PASSWORD=isi_password
 
+# Pastikan juga baris ini (sudah default di .env.example):
+SESSION_DRIVER=file
+
 # 5. Jalankan migration + seeder (data dummy)
 php artisan migrate:fresh --seed
 
 # 6. Install dependency frontend
 npm install
 ```
+
+> ⚠️ Jangan lupa jalankan `php artisan key:generate` (langkah 3) — tanpa ini akan muncul error `MissingAppKeyException` saat membuka aplikasi di browser.
 
 ### Menjalankan Server (2 terminal berjalan bersamaan)
 
@@ -158,3 +163,55 @@ Menggunakan **Laravel Sanctum** (Bearer Token) — dipilih karena aplikasi ini m
 - ✅ Search/filter dinamis di semua halaman admin
 - ✅ API design konsisten (REST, resource-based)
 - ✅ Dokumentasi API lengkap
+
+---
+
+## 4. Troubleshooting
+
+Berikut kendala yang ditemukan saat pengujian *clone & run* dari awal di device lain, beserta solusinya.
+
+### `npm install` gagal dengan error `ERESOLVE` (konflik versi `vite`)
+
+```
+npm error Found: vite@8.1.3
+npm error peer vite@"^7.0.0" from laravel-vite-plugin@2.1.0
+```
+
+**Penyebab:** versi `vite` di `package.json` tidak kompatibel dengan `laravel-vite-plugin`.
+
+**Solusi:**
+1. Pastikan `package.json` memakai `"vite": "^7.0.0"` (bukan `^8.x`)
+2. Hapus `node_modules` dan `package-lock.json` kalau sudah sempat terbentuk sebelumnya:
+   ```bash
+   rm -rf node_modules package-lock.json
+   ```
+3. Install ulang:
+   ```bash
+   npm install
+   ```
+
+### Error `MissingAppKeyException` saat membuka aplikasi di browser
+
+**Penyebab:** langkah `php artisan key:generate` belum dijalankan, sehingga `APP_KEY` di `.env` masih kosong.
+
+**Solusi:**
+```bash
+php artisan key:generate
+```
+
+### Error `relation "sessions" does not exist` saat membuka aplikasi
+
+```
+SQLSTATE[42P01]: Undefined table: 7 ERROR: relation "sessions" does not exist
+```
+
+**Penyebab:** `SESSION_DRIVER` di `.env` masih bernilai `database`, padahal project ini tidak membuat migration tabel `sessions` (autentikasi memakai token Sanctum, bukan session).
+
+**Solusi:** pastikan di `.env`:
+```env
+SESSION_DRIVER=file
+```
+Lalu bersihkan cache config:
+```bash
+php artisan config:clear
+```

@@ -118,7 +118,7 @@ resources/js/
 ```
 
 ### Dokumentasi API
-Tersedia terpisah di `API_Documentation_Portal_Dashboard.docx` — berisi seluruh endpoint beserta contoh request/response.
+Tersedia terpisah di `Sylvia Divalona - API Documentation - Portal Dashboard.pdf` — berisi seluruh endpoint beserta contoh request/response.
 
 ---
 
